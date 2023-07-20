@@ -1,0 +1,58 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Build and publish image
+
+on:
+  release:
+    types:
+      - published
+
+env:
+  NEXUS_URL: ${{ vars.NEXUS_URL }}
+  NEXUS_PORT: ${{ vars.NEXUS_PORT }}
+  WCAG_BOT_LOGIN: ${{ secrets.WCAG_BOT_LOGIN }}
+  WCAG_BOT_PASSWORD: ${{ secrets.WCAG_BOT_PASSWORD }}
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          path: ./${{ github.repository }}
+
+      - name: Log in to Docker
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ env.NEXUS_URL }}:${{ env.NEXUS_PORT }}
+          username: ${{ env.WCAG_BOT_LOGIN }}
+          password: ${{ env.WCAG_BOT_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.4.0
+        with:
+          images: ${{ env.NEXUS_URL }}:${{ env.NEXUS_PORT }}/${{ github.event.repository.name }}
+          tags: |
+            type=ref,event=tag
+          flavor: |
+            latest=false
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4.0.0
+        with:
+          context: ${{ github.workspace }}/${{ github.repository }}/
+          file: ${{ github.workspace }}/${{ github.repository }}/Dockerfile
+          push: true
+          no-cache: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
