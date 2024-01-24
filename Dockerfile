@@ -3,9 +3,9 @@
 FROM maven:3.8.6-openjdk-11 as app-builder
 WORKDIR /build
 
-# A specifc git branch, tag or commit to build from, defaults to integration (dev build)
+# A specifc git branch, tag or commit to build from, defaults to master (release build)
 ARG GH_CHECKOUT
-ENV GH_CHECKOUT=${GH_CHECKOUT:-integration}
+ENV GH_CHECKOUT=${GH_CHECKOUT:-master}
 
 # Clone the repo, checkout the revision and build the application
 RUN git clone https://github.com/veraPDF/veraPDF-rest.git
@@ -23,7 +23,7 @@ FROM eclipse-temurin:11 as jre-builder
 
 # Create a custom Java runtime
 RUN "$JAVA_HOME/bin/jlink" \
-         --add-modules java.base,java.logging,java.xml,java.management,java.sql,java.desktop \
+         --add-modules java.base,java.logging,java.xml,java.management,java.sql,java.desktop,jdk.crypto.ec \
          --strip-debug \
          --no-man-pages \
          --no-header-files \
@@ -60,6 +60,7 @@ WORKDIR /opt/verapdf-rest
 COPY --from=app-builder /build/veraPDF-rest/target/verapdf-rest-${VERAPDF_REST_VERSION}.jar /opt/verapdf-rest/
 # Copy the default configuration file
 COPY --from=app-builder /build/veraPDF-rest/server.yml /var/opt/verapdf-rest/config/
+COPY --from=app-builder /build/veraPDF-rest/config /opt/verapdf-rest/config/
 
 VOLUME /var/opt/verapdf-rest
 EXPOSE 8080

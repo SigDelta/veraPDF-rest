@@ -20,7 +20,7 @@ FROM eclipse-temurin:11 as jre-builder
 
 # Create a custom Java runtime
 RUN "$JAVA_HOME/bin/jlink" \
-         --add-modules java.base,java.logging,java.xml,java.management,java.sql,java.desktop \
+         --add-modules java.base,java.logging,java.xml,java.management,java.sql,java.desktop,jdk.crypto.ec \
          --strip-debug \
          --no-man-pages \
          --no-header-files \
@@ -57,6 +57,7 @@ WORKDIR /opt/verapdf-rest
 COPY --from=dev-builder /build/veraPDF-rest/target/verapdf-rest-${VERAPDF_REST_VERSION}.jar /opt/verapdf-rest/
 # Copy the default configuration file
 COPY server.yml /var/opt/verapdf-rest/config/
+COPY config /opt/verapdf-rest/config/
 
 VOLUME /var/opt/verapdf-rest
 EXPOSE 8080
