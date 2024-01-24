@@ -13,10 +13,7 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
-import org.verapdf.rest.resources.ApiResource;
-import org.verapdf.rest.resources.HomePageResource;
-import org.verapdf.rest.resources.ValidateResource;
-import org.verapdf.rest.resources.ValidationExceptionMapper;
+import org.verapdf.rest.resources.*;
 
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
@@ -86,6 +83,10 @@ public class VeraPdfRestApplication extends Application<VeraPdfRestConfiguration
         environment.jersey().register(new ApiResource());
         environment.jersey().register(new HomePageResource());
         environment.jersey().register(vem);
+
+        String endpointUrl = "http://localhost:8080/api";
+        VerificationHealthCheck verificationHealthCheck = new VerificationHealthCheck(environment, endpointUrl);
+        environment.healthChecks().register("verification", verificationHealthCheck);
         // Set up cross domain REST
         setupCORS(environment);
     }
