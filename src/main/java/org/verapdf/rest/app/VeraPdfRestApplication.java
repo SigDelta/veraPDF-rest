@@ -84,9 +84,6 @@ public class VeraPdfRestApplication extends Application<VeraPdfRestConfiguration
         environment.jersey().register(new HomePageResource());
         environment.jersey().register(vem);
 
-        String endpointUrl = "http://localhost:8080/api";
-        VerificationHealthCheck verificationHealthCheck = new VerificationHealthCheck(environment, endpointUrl);
-        environment.healthChecks().register("verification", verificationHealthCheck);
         // Set up cross domain REST
         setupCORS(environment);
     }

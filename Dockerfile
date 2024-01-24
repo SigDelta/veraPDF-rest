@@ -58,8 +58,6 @@ COPY --from=app-builder /build/veraPDF-rest/target/verapdf-rest-${VERAPDF_REST_V
 COPY --from=app-builder /build/veraPDF-rest/server.yml /var/opt/verapdf-rest/config/
 COPY --from=app-builder /build/veraPDF-rest/config /opt/verapdf-rest/config/
 
-COPY ./test test
-
 VOLUME /var/opt/verapdf-rest
 EXPOSE 8080
 

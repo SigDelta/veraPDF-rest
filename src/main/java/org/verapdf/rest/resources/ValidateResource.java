@@ -354,7 +354,7 @@ public class ValidateResource {
 	private static InputStream validate(InputStream uploadedInputStream, String fileName, String profileId,
 	                                    String sha1Hex, FormatOption formatOption, Integer fileSize) {
 		if (fileName == null) {
-			fileName = "default_filename.pdf";
+			throw new BadRequestException("File name is empty");
 		}
 
 		SeekableInputStream seekableInputStream = createInputStream(uploadedInputStream, sha1Hex, fileSize);
