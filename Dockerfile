@@ -27,6 +27,8 @@ RUN "$JAVA_HOME/bin/jlink" \
 # Now the final application image
 FROM debian:bullseye-slim
 
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Set for additional arguments passed to the java run command, no default
 ARG JAVA_OPTS
 ENV JAVA_OPTS=$JAVA_OPTS
