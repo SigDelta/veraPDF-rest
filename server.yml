@@ -8,6 +8,7 @@ server:
 logging:
   level: INFO
   loggers:
+    io.dropwizard.setup.AdminEnvironment: ERROR
     "org.verapdf":
       level: DEBUG
       additive: false

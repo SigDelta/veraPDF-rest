@@ -1,17 +1,11 @@
 # See https://docs.docker.com/engine/userguide/eng-image/multistage-build/
 # First build the app on a maven open jdk 11 container
 FROM maven:3.8.6-openjdk-11 as app-builder
-WORKDIR /build
 
-# A specifc git branch, tag or commit to build from, defaults to master (release build)
-ARG GH_CHECKOUT
-ENV GH_CHECKOUT=${GH_CHECKOUT:-master}
-
-# Clone the repo, checkout the revision and build the application
-RUN git clone https://github.com/veraPDF/veraPDF-rest.git
+COPY . /build/veraPDF-rest
 
 WORKDIR /build/veraPDF-rest
-RUN git checkout ${GH_CHECKOUT} && mvn clean package
+RUN mvn clean package
 
 # Install dumb-init for process safety
 # https://github.com/Yelp/dumb-init
@@ -23,15 +17,17 @@ FROM eclipse-temurin:11 as jre-builder
 
 # Create a custom Java runtime
 RUN "$JAVA_HOME/bin/jlink" \
-         --add-modules java.base,java.logging,java.xml,java.management,java.sql,java.desktop,jdk.crypto.ec \
-         --strip-debug \
-         --no-man-pages \
-         --no-header-files \
-         --compress=2 \
-         --output /javaruntime
+    --add-modules java.base,java.logging,java.xml,java.management,java.sql,java.desktop,jdk.crypto.ec \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=2 \
+    --output /javaruntime
 
 # Now the final application image
 FROM debian:bullseye-slim
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Set for additional arguments passed to the java run command, no default
 ARG JAVA_OPTS
